@@ -1,70 +1,98 @@
-// Load environment variables
+// Import dotenv variables for Port number and Database link for connection
 require('dotenv').config();
 
+//import express web framework to simplify code and avoid mundane tasks
 const express = require('express');
-const { Pool } = require('pg');
-const cors = require('cors');
-
+// Define express as an object (app)
 const app = express();
+
+// cors doesnt allow two different ports, it controls which browser ORIGINS are allowed to call the API
+// Ex: "http://localhost:3000" <- 3000 is the origin
+// So if "http://localhost:5173" comes along, it wouldnt be allowed to make the API call without cors
+const cors = require('cors');
+// Import PORT value from dotenv and default to 3000 if it could not be set
 const PORT = process.env.PORT || 3000;
 
-// Create PostgreSQL connection pool
+// Import Pool from pg for postgreSQL connection
+const { Pool } = require('pg');
+// Connect to database using Pool connection
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL
+	connectionString: process.env.DATABASE_URL
 });
 
-// Test database connection
-pool.query('SELECT NOW()', (err, res) => {
-  if (err) {
-    console.error('Database connection error:', err);
-  } else {
-    console.log('Database connected:', res.rows[0].now);
-  }
+// Get date from db query and await expecdted err or response to test connection, log to console no matter the case
+pool.query('SELECT NOW() AS now', (err, res) => {
+	if (err) {
+		console.error('DB connection test failed:', err.message);
+	} else {
+		console.log('Database connected at:', res.rows[0].now);
+	}
 });
 
-// Middleware
+// Middleware that parses JSON request bodies so the req.body actually works for POST and PUT
 app.use(express.json());
+// Middleware defined as above
 app.use(cors());
 
-// Root route
+// Root Route to test if server is running
 app.get('/', (req, res) => {
-  res.json({ message: 'Job Tracker API - Server is running!' });
+	res.json({ message: 'Job tracker API - Server is running'});
 });
 
-// GET all applications
+// get /api/applications which gets all jobs from applications section in PostgreSQL db with error handling
 app.get('/api/applications', async (req, res) => {
-  try {
-    const result = await pool.query(
-      'SELECT * FROM applications ORDER BY created_at DESC'
-    );
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Database error' });
-  }
+	try {
+		const result = await pool.query('SELECT * FROM applications ORDER BY created_at DESC');
+		res.json(result.rows);
+		console.log('Get worked');
+	} catch (err) {
+		console.error('Get application failed:', err.message);
+		res.status(500).json({ error: 'Database error' });
+	}
 });
 
-// POST new application
+// post /api/applications which posts a new job to the applications section in PostgreSQL db with error handling
 app.post('/api/applications', async (req, res) => {
-  try {
-    const { company, position, status, date_applied, salary_range, job_url, notes } = req.body;
-    
-    const result = await pool.query(
-      `INSERT INTO applications 
-       (company, position, status, date_applied, salary_range, job_url, notes) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7) 
-       RETURNING *`,
-      [company, position, status || 'to_apply', date_applied, salary_range, job_url, notes]
-    );
-    
-    res.status(201).json(result.rows[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to create application' });
-  }
+	try {
+		const { company, position, status, date_applied, salary_range, job_url, notes } = req.body;
+
+		const result = await pool.query(
+			`INSERT INTO applications
+			(company, position, status, date_applied, salary_range, job_url, notes )
+			VALUES ($1, $2, $3, $4, $5, $6, $7)
+			Returning *`,
+			[company, position, status || 'to_apply', date_applied, salary_range, job_url, notes]
+		);
+
+		res.status(201).json(result.rows[0]);
+		console.log('Post worked');
+	} catch (err) {
+		console.error('Post application failed:', err.message);
+		res.status(500).json({ error: 'Failed to create application' });
+	}
 });
 
-// Start server
+// delete /api/applications/:id which deletes a job by id from the applications section in PostgreSQL db with error handlind
+app.delete('/api/applications/:id', async (req, res) => {
+	try{
+		const { id } = req.params;
+
+		const result= await pool.query(
+			`DELETE FROM applications WHERE id = $1 RETURNING *`, [id]
+		);
+
+		if (result.rows.length === 0) {
+			return res.status(404).json({ error: 'Application not found' });
+		}
+
+		res.json({ message: 'Deleted successfully', application: result.rows[0] });
+	} catch (err) {
+		console.error('Application deletion failed:', err.message);
+		res.status(500).json({ error: 'Failed to delete application' });
+	}
+});
+
+// Start backend server and send message to console when running
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+	console.log(`Backend Server running on http://localhost:${PORT}`);
 });
