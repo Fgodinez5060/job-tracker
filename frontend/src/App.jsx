@@ -65,6 +65,20 @@ function App() {
     });
   };
 
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/applications/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+	fetchApplications();
+      }
+    } catch (error) {
+      console.error('Error deleting application:', error);
+    }
+  };
+
   return (
     <div className="App">
       <h1>Job Application Tracker</h1>
@@ -146,6 +160,10 @@ function App() {
                   </a>
                 )}
                 {app.notes && <p className="notes">{app.notes}</p>}
+
+		<button onClick={() => handleDelete(app.id)} className="delete-btn">
+		  Delete
+		</button>
               </div>
             ))}
           </div>

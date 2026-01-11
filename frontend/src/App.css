@@ -149,6 +149,17 @@ button:hover {
   border-top: 1px solid #444;
 }
 
+.delete-btn {
+  background: #dc3545;
+  margin-top: 12px;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.delete-btn:hover {
+  background: #c82333;
+}
+
 a {
   color: #007bff;
   text-decoration: none;
