@@ -44,7 +44,6 @@ app.get('/api/applications', async (req, res) => {
 	try {
 		const result = await pool.query('SELECT * FROM applications ORDER BY created_at DESC');
 		res.json(result.rows);
-		console.log('Get worked');
 	} catch (err) {
 		console.error('Get application failed:', err.message);
 		res.status(500).json({ error: 'Database error' });
@@ -77,7 +76,7 @@ app.delete('/api/applications/:id', async (req, res) => {
 	try{
 		const { id } = req.params;
 
-		const result= await pool.query(
+		const result = await pool.query(
 			`DELETE FROM applications WHERE id = $1 RETURNING *`, [id]
 		);
 
@@ -91,6 +90,34 @@ app.delete('/api/applications/:id', async (req, res) => {
 		res.status(500).json({ error: 'Failed to delete application' });
 	}
 });
+
+// put /api/applications/:id which puts new information in a job by id (updates) from the applications secing in PostgreSQL db with error handling
+app.put('/api/applications/:id', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { company, position, status, date_applied, salary_range, job_url, notes } = req.body;
+
+		const result = await pool.query(
+			`UPDATE applications
+			SET company = $1, position = $2, status = $3, date_applied = $4, salary_range = $5,
+			job_url = $6, notes = $7
+			WHERE id = $8
+			RETURNING *`, [company, position, status || 'to_apply', date_applied, salary_range, job_url, notes, id]
+		);
+
+		if (result.rows.length === 0) {
+			return res.status(404).json({ error: 'Application not found'});
+		}
+
+		res.status(201).json(result.rows[0]);
+		console.log('Put worked');
+
+	} catch (err) {
+		console.error('Put application failed:', err.message);
+		res.status(500).json({error: 'Failed to update application' });
+	}
+});
+
 
 // Start backend server and send message to console when running
 app.listen(PORT, () => {
