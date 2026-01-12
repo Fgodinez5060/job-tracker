@@ -149,9 +149,55 @@ button:hover {
   border-top: 1px solid #444;
 }
 
+.card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  align-items: center;
+}
+
+.status-select {
+  flex: 1;
+  padding: 8px;
+  background: #1a1a1a;
+  border: 2px solid #444;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.edit-btn {
+  background: #ffc107;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.edit-btn:hover {
+  background: #e0a800;
+}
+
+.save-btn {
+  background: #28a745;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.save-btn:hover {
+  background: #218838;
+}
+
+.cancel-btn {
+  background: #6c757d;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.cancel-btn:hover {
+  background: #5a6268;
+}
+
 .delete-btn {
   background: #dc3545;
-  margin-top: 12px;
   padding: 8px 16px;
   font-size: 14px;
 }

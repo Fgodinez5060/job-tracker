@@ -12,6 +12,10 @@ function App() {
     notes: ''
   });
 
+  // Handles application to be edited and new selection
+  const [editingId, setEditingId] = useState(null);
+  const [editStatus, setEditStatus] = useState('');
+
   // Fetch applications when component loads
   useEffect(() => {
     fetchApplications();
@@ -76,6 +80,35 @@ function App() {
       }
     } catch (error) {
       console.error('Error deleting application:', error);
+    }
+  };
+
+  const handleUpdate = async (id) => {
+    try {
+      const app = applications.find(a => a.id === id);
+
+      const response = await fetch(`http://localhost:3000/api/applications/${id}`, {
+	method: 'PUT',
+	headers: {
+	  'Content-Type': 'application/json',
+	},
+	body: JSON.stringify({
+	  company: app.company,
+	  position: app.position,
+	  status: editStatus,
+	  date_applied: app.date_applied,
+	  salary_range: app.salary_range,
+	  job_url: app.job_url,
+	  notes: app.notes
+	})
+      });
+
+      if (response.ok) {
+	setEditingId(null);
+	fetchApplications();
+      }
+    } catch (error) {
+      console.error('Error updating application:', error);
     }
   };
 
@@ -161,9 +194,45 @@ function App() {
                 )}
                 {app.notes && <p className="notes">{app.notes}</p>}
 
-		<button onClick={() => handleDelete(app.id)} className="delete-btn">
-		  Delete
-		</button>
+		<div className="card-actions">
+		  {editingId === app.id ? (
+		    <>
+		      <select
+			value={editStatus}
+			onChange={(e) => setEditStatus(e.target.value)}
+			className="status-select"
+		      >
+			<option value="to_apply">To Apply</option>
+			<option value="applied">Applied</option>
+			<option value="phone_screen">Phone Screen</option>
+			<option value="interview">Interview</option>
+			<option value="offer">Offer</option>
+			<option value="rejected">Rejected</option>
+		      </select>
+		      <button onClick={() => handleUpdate(app.id)} className="save-btn">
+			Save
+		      </button>
+		      <button onClick={() => setEditingId(null)} className="cancel-btn">
+			Cancel
+		      </button>
+		    </>
+		  ) : (
+		    <>
+		      <button
+			onClick={() => {
+			  setEditingId(app.id);
+			  setEditStatus(app.status);
+			}}
+			className="edit-btn"
+		      >
+			Edit
+		      </button>
+		      <button onClick={() => handleDelete(app.id)} className="delete-btn">
+			Delete
+		      </button>
+		    </>
+		  )}
+		</div>
               </div>
             ))}
           </div>
