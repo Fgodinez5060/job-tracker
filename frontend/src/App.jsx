@@ -23,7 +23,7 @@ function App() {
 
   const fetchApplications = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/applications');
+      const response = await fetch('https://job-tracker-production-fecf.up.railway.app/api/applications');
       const data = await response.json();
       setApplications(data);
     } catch (error) {
@@ -35,7 +35,7 @@ function App() {
     e.preventDefault();
     
     try {
-      const response = await fetch('http://localhost:3000/api/applications', {
+      const response = await fetch('https://job-tracker-production-fecf.up.railway.app/api/applications', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -71,7 +71,7 @@ function App() {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/applications/${id}`, {
+      const response = await fetch(`https://job-tracker-production-fecf.up.railway.app/api/applications/${id}`, {
         method: 'DELETE'
       });
 
@@ -87,7 +87,7 @@ function App() {
     try {
       const app = applications.find(a => a.id === id);
 
-      const response = await fetch(`http://localhost:3000/api/applications/${id}`, {
+      const response = await fetch(`https://job-tracker-production-fecf.up.railway.app/api/applications/${id}`, {
 	method: 'PUT',
 	headers: {
 	  'Content-Type': 'application/json',
