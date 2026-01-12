@@ -120,8 +120,8 @@ app.put('/api/applications/:id', async (req, res) => {
 	}
 });
 
-
+// Edit server listen to all network interfaces for Railway deployment
 // Start backend server and send message to console when running
-app.listen(PORT, () => {
-	console.log(`Backend Server running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+	console.log(`Backend Server running on port ${PORT}`);
 });
