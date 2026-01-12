@@ -32,7 +32,9 @@ pool.query('SELECT NOW() AS now', (err, res) => {
 // Middleware that parses JSON request bodies so the req.body actually works for POST and PUT
 app.use(express.json());
 // Middleware defined as above
-app.use(cors());
+app.use(cors({
+	origin: '*' // Allow all origins
+}));
 
 // Root Route to test if server is running
 app.get('/', (req, res) => {
